@@ -9,7 +9,8 @@ exports.getAddProduct = (req, res, next) => {
     path: '/admin/add-product',
     editing: false,
     hasError: false,
-    errorMessage: null
+    errorMessage: null,
+    validationErrors: []
   })
 }
 
@@ -24,7 +25,7 @@ exports.postAddProduct = (req, res, next) => {
     console.log(errors.array())
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
-      path: '/admin/edit-product',
+      path: '/admin/add-product',
       editing: false,
       hasError: true,
       product: {
@@ -33,7 +34,8 @@ exports.postAddProduct = (req, res, next) => {
         price: price,
         description: description
       },
-      errorMessage: errors.array()[0].msg
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array()
     })
   }
   const product = new Product({
@@ -51,7 +53,28 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect('/admin/products')
     })
     .catch(err => {
-      console.log(err)
+      // either
+
+      // return res.status(500).render('admin/edit-product', {
+      //   pageTitle: 'Add Product',
+      //   path: '/admin/add-product',
+      //   editing: false,
+      //   hasError: true,
+      //   product: {
+      //     title: title,
+      //     imageUrl: imageUrl,
+      //     price: price,
+      //     description: description
+      //   },
+      //   errorMessage: 'Database operation failed! Please try again',
+      //   validationErrors: errors.array()
+      // })
+
+      // or
+      // res.redirect('/500')
+      const error = new Error(err)
+      error.httpStatusCode = 500
+      return next(error)
     })
 }
 
@@ -76,7 +99,11 @@ exports.getEditProduct = (req, res, next) => {
         validationErrors: []
       })
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+      const error = new Error(err)
+      error.httpStatusCode = 500
+      return next(error)
+    })
 }
 
 exports.postEditProduct = (req, res, next) => {
@@ -119,9 +146,11 @@ exports.postEditProduct = (req, res, next) => {
         console.log('UPDATED PRODUCT!')
         res.redirect('/admin/products')
       })
+    }).catch(err => {
+      const error = new Error(err)
+      error.httpStatusCode = 500
+      return next(error)
     })
-    
-    .catch(err => console.log(err))
 }
 
 exports.getProducts = (req, res, next) => {
@@ -136,7 +165,11 @@ exports.getProducts = (req, res, next) => {
         path: '/admin/products'
       })
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+      const error = new Error(err)
+      error.httpStatusCode = 500
+      return next(error)
+    })
 }
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -146,5 +179,9 @@ exports.postDeleteProduct = (req, res, next) => {
       console.log('DESTROYED PRODUCT')
       res.redirect('/admin/products')
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+      const error = new Error(err)
+      error.httpStatusCode = 500
+      return next(error)
+    })
 }
