@@ -18,7 +18,6 @@ router.post(
     '/add-product', 
     [
         body('title', 'The title must be more than 3 characters!').isString().isLength({ min: 3 }).trim(),
-        body('imageUrl', 'Invlaid image URL').isURL(),
         body('price', 'The price should be in 0.00 format').isFloat(),
         body('description', 'Should be more than 5 characters').isLength({ min: 5, max: 400 }).trim()
     ], 
@@ -29,7 +28,7 @@ router.get(
     '/edit-product/:productId', isAuth, adminController.getEditProduct)
 
 router.post(
-    '/edit-product', 
+    '/edit-product',
     [
         body('title', 'The title must be more than 3 characters!').isString().isLength({ min: 3 }).trim(),
         body('imageUrl', 'Invlaid image URL').isURL(),
@@ -37,8 +36,9 @@ router.post(
         body('description', 'Should be more than 5 characters').isLength({ min: 5, max: 400 }).trim()
     ],
     isAuth, 
-    adminController.postEditProduct)
+    adminController.postEditProduct
+)
 
-router.post('/delete-product', isAuth, adminController.postDeleteProduct)
+router.delete('/product/:productId', isAuth, adminController.deleteProduct)
 
 module.exports = router

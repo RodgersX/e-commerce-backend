@@ -11,6 +11,8 @@ const flash = require('connect-flash')
 
 const errorController = require('./controllers/error')
 const User = require('./models/user')
+const shopController = require('./controllers/shop')
+const isAuth = require('./middleware/is-auth')
 
 const MONGODB_URI =
   'mongodb+srv://brian:Xh3xfglahEAIf3tV@cluster0-vv8md.mongodb.net/shop'
@@ -39,13 +41,11 @@ app.use(
     store: store
   })
 )
-app.use(csrfProtection)
 app.use(flash())
 
 // passes variables to local views once they are rendered
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn
-  res.locals.csrfToken = req.csrfToken()
   next()
 })
 
@@ -66,6 +66,14 @@ app.use((req, res, next) => {
   })
 })
 
+app.post('/create-order', isAuth, shopController.postOrder)
+
+app.use(csrfProtection)
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken()
+  next()
+})
+
 app.use('/admin', adminRoutes)
 app.use(shopRoutes)
 app.use(authRoutes)
@@ -75,9 +83,9 @@ app.use(errorController.get404)
 
 // express error handling middleware
 app.use((error, req, res, next) => {
-  // res.status(error.httpStatusCode).render(...)
+  console.log(error)
   res.status(500).render('500', {
-    pageTitle: 'Error!', 
+    pageTitle: 'Error!',
     path: '/500', 
     isAuthenticated: req.session.isLoggedIn 
   })
@@ -87,7 +95,7 @@ mongoose
   .connect(MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true})
   .then(result => {
     app.listen(3000)
-    console.log('3000 is your magic port.')
+    console.log('3000 is your magic port')
   })
   .catch(err => {
     console.log(err)
